@@ -1,0 +1,104 @@
+# Byte-compiled / optimized / DLL files
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+*.sqlite3
+*.db
+
+# Virtual environment
+venv/
+pollify_env/
+env/
+*.env
+
+# Django secret key file (if used separately)
+secret_key.json
+
+# Logs
+logs/
+*.log
+*.out
+*.err
+nohup.out
+
+# Django stuff
+*.pot
+*.pyc
+*.pyo
+db.sqlite3
+*.sqlite3
+*.log
+*.pid
+*.swp
+media/
+
+# Ignore migrations except __init__.py
+**/migrations/*.py
+!**/migrations/__init__.py
+
+# Static files (build artifacts)
+static/
+staticfiles/
+static_root/
+
+# Media files (user uploads)
+media/
+media_root/
+
+# Local environment configuration
+.env
+*.env
+config/settings/local.py
+
+# VSCode editor files
+.vscode/
+*.code-workspace
+
+# MacOS system files
+.DS_Store
+
+# PyCharm project files
+.idea/
+*.iml
+
+# Coverage reports
+htmlcov/
+.coverage
+*.cover
+.hypothesis/
+.coverage.*
+
+# pytest cache
+.pytest_cache/
+
+# Celery and background task queues
+celerybeat-schedule
+celerybeat.pid
+
+# Pip file
+Pipfile
+Pipfile.lock
+
+# Jupyter Notebooks
+.ipynb_checkpoints/
+
+# Node.js / frontend-related files (if applicable)
+node_modules/
+npm-debug.log
+yarn-error.log
+
+# Compiled CSS (if using SASS/SCSS)
+*.sass-cache/
+*.scssc
+
+# Build directories
+dist/
+build/
+*.egg-info/
+*.egg
+*.manifest
+*.spec
+
+# Ignore compiled translations
+*.mo
