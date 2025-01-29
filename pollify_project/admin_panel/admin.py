@@ -1,3 +1,9 @@
 from django.contrib import admin
+from .models import ActivityLog
 
-# Register your models here.
+class ActivityLogAdmin(admin.ModelAdmin):
+    list_display = ('user', 'action', 'timestamp')
+    search_fields = ('user__username', 'action')
+    list_filter = ('timestamp',)
+
+admin.site.register(ActivityLog, ActivityLogAdmin)

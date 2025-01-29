@@ -1,0 +1,55 @@
+{% extends "base.html" %}
+{% load crispy_forms_tags static %}
+
+{% block content %}
+<div class="container mt-5">
+    <!-- Profile Header -->
+    <div class="text-center mb-4">
+        <!-- Handle missing profile picture with a default fallback -->
+        {% if user.profile_picture and user.profile_picture.url %}
+            <img class="rounded-circle account-img mb-3" 
+                 src="{{ user.profile_picture.url }}" 
+                 alt="Profile Image" width="150" height="150">
+        {% else %}
+            <img class="rounded-circle account-img mb-3" 
+                 src="{% static 'img/default.jpg' %}" 
+                 alt="Default Profile Image" width="150" height="150">
+        {% endif %}
+
+        <h2 class="account-heading">{{ user.username }}</h2>
+        <p class="text-secondary">{{ user.email }}</p>
+        {% if user.bio %}
+            <p class="mt-2">{{ user.bio }}</p>
+        {% endif %}
+    </div>
+
+    <!-- Update Profile Form -->
+    <form method="POST" enctype="multipart/form-data" class="p-4 border rounded shadow bg-light">
+        {% csrf_token %}
+        <div class="row">
+            <div class="col-md-6">
+                <fieldset>
+                    <legend>Account Info</legend>
+                    {{ u_form|crispy }}
+                </fieldset>
+            </div>
+            <div class="col-md-6">
+                <fieldset>
+                    <legend>Profile Details</legend>
+                    {{ p_form|crispy }}
+                </fieldset>
+            </div>
+        </div>
+
+        <!-- Centered Update Profile Button -->
+        <div class="text-center">
+            <button class="btn btn-primary mt-3" type="submit">Update Profile</button>
+        </div>
+    </form>
+
+    <!-- Centered Change Password Link -->
+    <div class="text-center mt-4">
+        <a href="{% url 'password_change' %}" class="btn btn-warning">Change Password</a>
+    </div>
+</div>
+{% endblock %}

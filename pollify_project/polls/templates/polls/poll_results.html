@@ -1,0 +1,34 @@
+{% extends 'base.html' %}
+{% block content %}
+<div class="container mt-5">
+    <h2>Results for: {{ poll.question }}</h2>
+    <p>Category: {{ poll.category }}</p>
+    <p>Created By: {{ poll.author.username }}</p>
+    <p>Expires At: {{ poll.expires_at|date:"F j, Y, g:i a" }}</p>
+
+    <h3>Poll Results</h3>
+    {% if poll.votes.exists %}
+    <ul class="list-group mb-4">
+        {% for choice in poll.choices.all %}
+        <li class="list-group-item">
+            <div class="d-flex justify-content-between">
+                <span>{{ choice.choice_text }}</span>
+                <span>{{ choice.votes_count }} votes</span>
+            </div>
+            <div class="progress mt-2">
+                {% with total_votes=poll.votes.count %}
+                <div class="progress-bar" role="progressbar" style="width: {{ choice.votes_count|floatformat:2|divisibleby:total_votes|default:0 }}%;" aria-valuenow="{{ choice.votes_count }}" aria-valuemin="0" aria-valuemax="{{ total_votes }}">
+                    {{ choice.votes_count|default:"0" }}%
+                </div>
+                {% endwith %}
+            </div>
+        </li>
+        {% endfor %}
+    </ul>
+    {% else %}
+    <p>No votes yet.</p>
+    {% endif %}
+
+    <a href="{% url 'poll_list' %}" class="btn btn-primary">Back to Polls</a>
+</div>
+{% endblock %}

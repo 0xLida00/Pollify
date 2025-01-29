@@ -1,0 +1,49 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="container mt-5">
+    <div class="card shadow-lg">
+        <div class="card-header bg-primary text-white">
+            <h2 class="mb-0 text-center">Edit Your Poll</h2>
+        </div>
+        <div class="card-body">
+            <form method="post" class="needs-validation" novalidate>
+                {% csrf_token %}
+                
+                <div class="mb-3">
+                    <label class="form-label fw-bold">{{ form.question.label }}</label>
+                    {{ form.question }}
+                </div>
+
+                <!-- Full-width Description Field -->
+                <div class="mb-3">
+                    <label class="form-label fw-bold d-block">{{ form.description.label }}</label>
+                    <textarea name="{{ form.description.name }}" class="form-control" rows="4">{{ form.description.value|default:'' }}</textarea>
+                </div>
+
+                <div class="mb-3">
+                    <label class="form-label fw-bold">{{ form.category.label }}</label>
+                    {{ form.category }}
+                </div>
+
+                <!-- Calendar Picker for Expires At -->
+                <div class="mb-3">
+                    <label class="form-label fw-bold">{{ form.expires_at.label }}</label>
+                    <input type="datetime-local" name="{{ form.expires_at.name }}" class="form-control" value="{{ form.expires_at.value|default:'' }}">
+                </div>
+
+                <div class="mb-3">
+                    <label class="form-label fw-bold">{{ form.choices.label }}</label>
+                    {{ form.choices }}
+                    <small class="text-muted d-block">You cannot modify choices after poll creation.</small>
+                </div>
+
+                <div class="d-flex justify-content-between">
+                    <a href="{% url 'poll_list' %}" class="btn btn-outline-secondary">Cancel</a>
+                    <button type="submit" class="btn btn-success">Save Changes</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}

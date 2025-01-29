@@ -11,6 +11,7 @@ https://docs.djangoproject.com/en/4.2/ref/settings/
 """
 
 from pathlib import Path
+import os
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -20,24 +21,57 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # See https://docs.djangoproject.com/en/4.2/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = 'django-insecure-!e6$w_7(_tb8w591hbrb5&-=b+1%x+c2^2lyzm4bxs-y9%ua#&'
+SECRET_KEY = 'django-insecure-e!43f16-5n6^r^03$e+sqju-kj)!e$$d*l+h&_+s^(1jaq=a9w'
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
 ALLOWED_HOSTS = []
 
+# Login and Logout settings
+LOGIN_URL = '/login/'
+LOGIN_REDIRECT_URL = '/'
+LOGOUT_REDIRECT_URL = '/'
 
 # Application definition
 
 INSTALLED_APPS = [
+    'daphne', # Django Channels ASGI server
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+
+    # Custom apps
+    'channels', # WebSockets support
+    'users',
+    'polls',
+    'comments',
+    'notifications',
+    'messaging',
+    'admin_panel',
+    'frontend',
+    'crispy_forms',
+    'crispy_bootstrap4',
+
+    # Third-party apps
+    'rest_framework',
 ]
+
+CRISPY_ALLOWED_TEMPLATE_PACKS = ("bootstrap", "bootstrap4")
+CRISPY_TEMPLATE_PACK = 'bootstrap4'
+
+# Set ASGI application
+ASGI_APPLICATION = "pollify_project.asgi.application"
+
+# Configure Redis for WebSocket communication
+CHANNEL_LAYERS = {
+    "default": {
+        "BACKEND": "channels.layers.InMemoryChannelLayer",  # Use Redis in production
+    },
+}
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
@@ -68,6 +102,10 @@ TEMPLATES = [
 ]
 
 WSGI_APPLICATION = 'pollify_project.wsgi.application'
+
+
+# Custom user model
+AUTH_USER_MODEL = 'users.User'
 
 
 # Database
@@ -116,6 +154,13 @@ USE_TZ = True
 # https://docs.djangoproject.com/en/4.2/howto/static-files/
 
 STATIC_URL = 'static/'
+STATICFILES_DIRS = [
+    os.path.join(BASE_DIR, 'static'),
+]
+STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
+
+MEDIA_URL = '/media/'
+MEDIA_ROOT = BASE_DIR / 'media'
 
 # Default primary key field type
 # https://docs.djangoproject.com/en/4.2/ref/settings/#default-auto-field

@@ -1,0 +1,31 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="container mt-5">
+    <h2>Create a New Poll</h2>
+    <form method="post">
+        {% csrf_token %}
+        <div class="mb-3">
+            {{ form.question.label_tag }}
+            {{ form.question }}
+        </div>
+        <div class="mb-3">
+            {{ form.description.label_tag }}
+            {{ form.description }}
+        </div>
+        <div class="mb-3">
+            {{ form.category.label_tag }}
+            {{ form.category }}
+        </div>
+        <div class="mb-3">
+            {{ form.expires_at.label_tag }}
+            {{ form.expires_at }}
+        </div>
+        <div class="mb-3">
+            {{ form.choices.label_tag }}
+            {{ form.choices }}
+        </div>
+        <button type="submit" class="btn btn-success">Create Poll</button>
+    </form>
+</div>
+{% endblock %}

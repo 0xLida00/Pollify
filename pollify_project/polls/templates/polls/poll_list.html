@@ -1,0 +1,77 @@
+{% extends 'base.html' %}
+{% block content %}
+<div class="container">
+    <div class="d-flex justify-content-between align-items-center mb-3">
+        <h2 class="mb-0">Available Polls</h2>
+        <a href="{% url 'poll_create' %}" class="btn btn-primary">Create New Poll</a>
+    </div>
+    <br>
+
+    <!-- Filtering and Sorting Options -->
+    <form method="get" class="mb-4 d-flex justify-content-center align-items-center flex-wrap">
+        <div class="input-group mb-2 mx-2" style="max-width: 250px; margin-top: 8px;">
+            <select name="filter_by" class="form-control align-middle">
+                <option value="">-- Filter By --</option>
+                <option value="category" {% if request.GET.filter_by == 'category' %}selected{% endif %}>Category</option>
+                <option value="author" {% if request.GET.filter_by == 'author' %}selected{% endif %}>Author</option>
+                <option value="expires" {% if request.GET.filter_by == 'expires' %}selected{% endif %}>Expiring Soon</option>
+            </select>
+        </div>
+    
+        <div class="input-group mb-2 mx-2" style="max-width: 250px; margin-top: 8px;">
+            <input type="text" name="value" class="form-control align-middle" placeholder="Enter Value" value="{{ request.GET.value }}">
+        </div>
+    
+        <div class="input-group mb-2 mx-2" style="max-width: 250px; margin-top: 8px;">
+            <select name="sort_by" class="form-control align-middle">
+                <option value="">-- Sort By --</option>
+                <option value="newest" {% if request.GET.sort_by == 'newest' %}selected{% endif %}>Newest</option>
+                <option value="oldest" {% if request.GET.sort_by == 'oldest' %}selected{% endif %}>Oldest</option>
+                <option value="most_voted" {% if request.GET.sort_by == 'most_voted' %}selected{% endif %}>Most Voted</option>
+            </select>
+        </div>
+    
+        <button type="submit" class="btn btn-primary mx-2 d-flex align-items-center" style="height: 38px;">Apply</button>
+        <a href="{% url 'poll_list' %}" class="btn btn-secondary mx-2 d-flex align-items-center" style="height: 38px;">Reset</a>
+    </form>
+
+    <!-- Polls List -->
+    <ul class="list-group">
+        {% for poll in polls %}
+        <li class="list-group-item d-flex justify-content-between align-items-center">
+            <div>
+                <a href="{% url 'poll_detail' poll.pk %}">{{ poll.question }}</a>
+                <br>
+                <small class="text-muted">Category: {{ poll.category }}</small>
+            </div>
+            <span class="badge badge-primary badge-pill">{{ poll.total_votes }} votes</span>
+        </li>
+        {% empty %}
+        <li class="list-group-item text-center">No polls available.</li>
+        {% endfor %}
+    </ul>
+
+    <!-- Pagination -->
+    {% if is_paginated %}
+    <div class="pagination mt-4 d-flex justify-content-center">
+        {% if page_obj.has_previous %}
+            <a class="btn btn-outline-primary mb-4 mx-1" href="?page=1&filter_by={{ request.GET.filter_by }}&value={{ request.GET.value }}&sort_by={{ request.GET.sort_by }}">First</a>
+            <a class="btn btn-outline-primary mb-4 mx-1" href="?page={{ page_obj.previous_page_number }}&filter_by={{ request.GET.filter_by }}&value={{ request.GET.value }}&sort_by={{ request.GET.sort_by }}">Previous</a>
+        {% endif %}
+
+        {% for num in page_obj.paginator.page_range %}
+            {% if page_obj.number == num %}
+                <a class="btn btn-primary mb-4 mx-1" href="?page={{ num }}&filter_by={{ request.GET.filter_by }}&value={{ request.GET.value }}&sort_by={{ request.GET.sort_by }}">{{ num }}</a>
+            {% elif num > page_obj.number|add:"-3" and num < page_obj.number|add:"3" %}
+                <a class="btn btn-outline-primary mb-4 mx-1" href="?page={{ num }}&filter_by={{ request.GET.filter_by }}&value={{ request.GET.value }}&sort_by={{ request.GET.sort_by }}">{{ num }}</a>
+            {% endif %}
+        {% endfor %}
+
+        {% if page_obj.has_next %}
+            <a class="btn btn-outline-primary mb-4 mx-1" href="?page={{ page_obj.next_page_number }}&filter_by={{ request.GET.filter_by }}&value={{ request.GET.value }}&sort_by={{ request.GET.sort_by }}">Next</a>
+            <a class="btn btn-outline-primary mb-4 mx-1" href="?page={{ page_obj.paginator.num_pages }}&filter_by={{ request.GET.filter_by }}&value={{ request.GET.value }}&sort_by={{ request.GET.sort_by }}">Last</a>
+        {% endif %}
+    </div>
+    {% endif %}
+</div>
+{% endblock %}

@@ -1,0 +1,14 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="container mt-5">
+    <h1 class="text-center">Welcome to Pollify</h1>
+    <p class="text-center">Create, vote, and explore polls from the community!</p>
+    <div class="text-center mt-4">
+        <a href="{% url 'poll_list' %}" class="btn btn-primary">View Polls</a>
+        {% if not user.is_authenticated %}
+        <a href="{% url 'signup' %}" class="btn btn-secondary">Sign Up</a>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}
