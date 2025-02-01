@@ -12,6 +12,8 @@ from django.contrib.auth.mixins import LoginRequiredMixin
 from django.http import JsonResponse
 from django.db.models import Count
 from .models import Poll, Choice, Vote
+from users.models import Follow
+from comments.models import Comment
 from .forms import PollForm
 from users.models import User
 from asgiref.sync import async_to_sync
@@ -20,7 +22,13 @@ from channels.layers import get_channel_layer
 
 # Home view
 def home(request):
-    return render(request, "home.html")
+    recent_polls = Poll.objects.order_by('-created_at')[:6]
+    recent_comments = Comment.objects.select_related('poll').order_by('-created_at')[:5]
+
+    return render(request, "home.html", {
+        "recent_polls": recent_polls,
+        "recent_comments": recent_comments
+    })
 
 
 # List View for Polls with Pagination and Filtering
@@ -172,11 +180,17 @@ def vote_poll(request, pk):
 def toggle_follow(request, user_id):
     """Toggle follow/unfollow functionality."""
     author = get_object_or_404(User, id=user_id)
-    if request.user in author.followers.all():
-        author.followers.remove(request.user)
+    
+    # Check if the user is already following
+    follow_instance = Follow.objects.filter(follower=request.user, followed=author).first()
+
+    if follow_instance:
+        # If following, unfollow the user
+        follow_instance.delete()
         return JsonResponse({"success": True, "action": "unfollow"})
     else:
-        author.followers.add(request.user)
+        # If not following, create a new follow instance
+        Follow.objects.create(follower=request.user, followed=author)
         return JsonResponse({"success": True, "action": "follow"})
 
 

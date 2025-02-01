@@ -1,125 +1,133 @@
 {% extends "base.html" %}
-{% load static%}
+{% load static %}
 
 {% block content %}
-<div class="container mt-5">
-    <!-- Poll Details -->
-    <div class="card shadow mb-4">
-        <div class="card-header bg-primary text-white d-flex justify-content-between align-items-center">
-            <h2 class="mb-0">{{ poll.question }}</h2>
-            <small>
-                Created by 
-                <a href="{% url 'profile' poll.author.username %}" class="text-light">{{ poll.author.username }}</a>
-                {% if user.is_authenticated and user != poll.author %}
-                    <button id="follow-btn" 
-                            data-user-id="{{ poll.author.id }}" 
-                            class="btn btn-sm ms-3 {% if is_following %}btn-danger{% else %}btn-success{% endif %}">
-                        {% if is_following %}Unfollow{% else %}Follow{% endif %}
-                    </button>
-                {% endif %}
-            </small>
-
-            <!-- Edit Poll Button (Only for Poll Author) -->
-            {% if user.is_authenticated and user == poll.author %}
-                <a href="{% url 'poll_edit' poll.pk %}" class="btn btn-warning btn-sm ms-3">Edit Poll</a>
-            {% endif %}
-        </div>
-        <div class="card-body">
-            <p class="text-muted"><strong>Description:</strong> {{ poll.description }}</p>
-            <p><strong>Category:</strong> {{ poll.category }}</p>
-            <p><strong>Expires At:</strong> {{ poll.expires_at|date:"F j, Y, g:i a" }}</p>
-
-            <!-- Voting Form -->
-            <form method="post" action="{% url 'vote_poll' poll.pk %}" class="mt-3">
-                {% csrf_token %}
-                {% if poll.has_expired %}
-                <p class="text-danger">This poll has expired. Voting is no longer available.</p>
-                {% elif can_vote %}
-                <h4 class="mb-3">Vote for Your Choice</h4>
-                {% for choice in poll.choices.all %}
-                <div class="form-check mb-2">
-                    <input class="form-check-input" type="radio" name="choice" value="{{ choice.id }}" id="choice{{ forloop.counter }}">
-                    <label class="form-check-label" for="choice{{ forloop.counter }}">
-                        {{ choice.choice_text }}
-                    </label>
-                </div>
-                {% endfor %}
-                <button type="submit" class="btn btn-primary mt-3 w-100">Submit Vote</button>
-                {% else %}
-                <p class="text-info">You need to <a href="{% url 'login' %}">log in</a> to vote.</p>
-                {% endif %}
-            </form>
-        </div>
-    </div>
-
-    <!-- Results Section -->
-    <div class="card shadow">
-        <div class="card-header bg-info text-white">
-            <h3 class="mb-0">Results</h3>
-        </div>
-        <div class="card-body">
-            <ul class="list-group mb-4">
-                {% for choice in choices_with_percentages %}
-                <li class="list-group-item">
-                    <div class="d-flex justify-content-between">
-                        <span>{{ choice.choice_text }}</span>
-                        <span id="choice-{{ choice.choice_text }}">{{ choice.percentage }}% ({{ choice.votes_count }} votes)</span>
+<div class="container-fluid mt-5">
+    <div class="row justify-content-center">
+        <div class="col-lg-8 col-md-10">
+            <!-- Poll Details -->
+            <div class="card shadow mb-4">
+                <div class="card-header bg-primary text-white d-flex justify-content-between align-items-center">
+                    <h2 class="mb-0">{{ poll.question }}</h2>
+                    <div class="d-flex align-items-center">
+                        <small class="mr-2 mb-0">
+                            Created by 
+                            <a href="{% url 'profile' poll.author.username %}" class="text-light font-weight-bold username-link">
+                                {{ poll.author.username }}
+                            </a>
+                        </small>
+                        {% if user.is_authenticated and user != poll.author %}
+                            <form method="post" action="{% url 'toggle_follow' poll.author.id %}" class="ml-2 mb-0 follow-form">
+                                {% csrf_token %}
+                                <button type="submit" class="btn btn-sm {% if is_following %}btn-danger{% else %}btn-success{% endif %}">
+                                    {% if is_following %}Unfollow{% else %}Follow{% endif %}
+                                </button>
+                            </form>
+                        {% endif %}
                     </div>
-                    <div class="progress mt-2">
-                        <div class="progress-bar bg-info" role="progressbar" 
-                             id="progress-{{ choice.choice_text }}"
-                             style="width: {{ choice.percentage }}%;" 
-                             aria-valuenow="{{ choice.percentage }}" aria-valuemin="0" aria-valuemax="100">
+
+                    {% if user.is_authenticated and user == poll.author %}
+                        <a href="{% url 'poll_edit' poll.pk %}" class="btn btn-warning btn-sm ms-3">Edit Poll</a>
+                    {% endif %}
+                </div>
+
+                <div class="card-body">
+                    <p class="text-muted"><strong>Description:</strong> {{ poll.description }}</p>
+                    <p><strong>Category:</strong> {{ poll.category }}</p>
+                    <p><strong>Expires At:</strong> {{ poll.expires_at|date:"F j, Y, g:i a" }}</p>
+
+                    <!-- Voting Form -->
+                    <form method="post" action="{% url 'vote_poll' poll.pk %}" class="mt-3">
+                        {% csrf_token %}
+                        {% if poll.has_expired %}
+                        <p class="text-danger">This poll has expired. Voting is no longer available.</p>
+                        {% elif can_vote %}
+                        <h4 class="mb-3">Vote for Your Choice</h4>
+                        {% for choice in poll.choices.all %}
+                        <div class="form-check mb-2">
+                            <input class="form-check-input" type="radio" name="choice" value="{{ choice.id }}" id="choice{{ forloop.counter }}">
+                            <label class="form-check-label" for="choice{{ forloop.counter }}">
+                                {{ choice.choice_text }}
+                            </label>
                         </div>
-                    </div>
-                </li>
-                {% endfor %}
-            </ul>
-        </div>
-    </div>
-    <br>
-
-    <!-- Comments Section -->
-    {% if user.is_authenticated %}
-    <div class="card shadow mb-4">
-        <div class="card-header bg-light text-dark">
-            <h4 class="mb-0">Comments</h4>
-        </div>
-        <div class="card-body">
-            <form method="post" action="{% url 'add_comment' poll.pk %}">
-                {% csrf_token %}
-                <div class="mb-3">
-                    <textarea name="content" class="form-control" placeholder="Add your comment here..." rows="3" required></textarea>
+                        {% endfor %}
+                        <button type="submit" class="btn btn-primary mt-3 w-100">Submit Vote</button>
+                        {% else %}
+                        <p class="text-info">You need to <a href="{% url 'login' %}">log in</a> to vote.</p>
+                        {% endif %}
+                    </form>
                 </div>
-                <button type="submit" class="btn btn-primary">Submit Comment</button>
-            </form>
-        </div>
-    </div>
-    {% endif %}
+            </div>
 
-    <div class="mt-4">
-        {% for comment in poll.comments.all %}
-        <div class="border rounded p-3 mb-2">
-            <strong>{{ comment.author.username }}</strong> 
-            <small class="text-muted">- {{ comment.created_at|date:"F j, Y, g:i a" }}</small>
-            <p class="mt-2">{{ comment.content }}</p>
-    
-            <!-- Vote Buttons with More Space & Tooltip -->
-            <button class="comment-vote btn btn-outline-success btn-sm me-3" 
-                    data-comment-id="{{ comment.id }}" data-action="upvote"
-                    title="Helpful">
-                👍 <span id="upvote-count-{{ comment.id }}">{{ comment.upvotes }}</span>
-            </button>
-    
-            <button class="comment-vote btn btn-outline-danger btn-sm" 
-                    data-comment-id="{{ comment.id }}" data-action="downvote"
-                    title="Not Helpful">
-                👎 <span id="downvote-count-{{ comment.id }}">{{ comment.downvotes }}</span>
-            </button>
+            <!-- Results Section -->
+            <div class="card shadow mb-4">
+                <div class="card-header bg-info text-white">
+                    <h3 class="mb-0">Results</h3>
+                </div>
+                <div class="card-body">
+                    <ul class="list-group mb-4">
+                        {% for choice in choices_with_percentages %}
+                        <li class="list-group-item">
+                            <div class="d-flex justify-content-between">
+                                <span>{{ choice.choice_text }}</span>
+                                <span id="choice-{{ choice.choice_text }}">{{ choice.percentage }}% ({{ choice.votes_count }} votes)</span>
+                            </div>
+                            <div class="progress mt-2">
+                                <div class="progress-bar bg-info" role="progressbar" 
+                                     id="progress-{{ choice.choice_text }}"
+                                     style="width: {{ choice.percentage }}%;" 
+                                     aria-valuenow="{{ choice.percentage }}" aria-valuemin="0" aria-valuemax="100">
+                                </div>
+                            </div>
+                        </li>
+                        {% endfor %}
+                    </ul>
+                </div>
+            </div>
+
+            <!-- Comments Section -->
+            {% if user.is_authenticated %}
+            <div class="card shadow mb-4">
+                <div class="card-header bg-light text-dark">
+                    <h4 class="mb-0">Comments</h4>
+                </div>
+                <div class="card-body">
+                    <form method="post" action="{% url 'add_comment' poll.pk %}">
+                        {% csrf_token %}
+                        <div class="mb-3">
+                            <textarea name="content" class="form-control" placeholder="Add your comment here..." rows="3" required></textarea>
+                        </div>
+                        <button type="submit" class="btn btn-primary">Submit Comment</button>
+                    </form>
+                </div>
+            </div>
+            {% endif %}
+
+            <div class="mt-4">
+                {% for comment in poll.comments.all %}
+                <div class="border rounded p-3 mb-2">
+                    <strong>{{ comment.author.username }}</strong> 
+                    <small class="text-muted">- {{ comment.created_at|date:"F j, Y g:i a" }}</small>
+                    <p class="mt-2">{{ comment.content }}</p>
+
+                    <!-- Vote Buttons with More Space & Tooltip -->
+                    <button class="comment-vote btn btn-outline-success btn-sm me-3" 
+                            data-comment-id="{{ comment.id }}" data-action="upvote"
+                            title="Helpful">
+                        👍 <span id="upvote-count-{{ comment.id }}">{{ comment.upvotes }}</span>
+                    </button>
+
+                    <button class="comment-vote btn btn-outline-danger btn-sm" 
+                            data-comment-id="{{ comment.id }}" data-action="downvote"
+                            title="Not Helpful">
+                        👎 <span id="downvote-count-{{ comment.id }}">{{ comment.downvotes }}</span>
+                    </button>
+                </div>
+                {% empty %}
+                <p class="text-muted text-center">No comments yet. Be the first to comment!</p>
+                {% endfor %}
+            </div>
         </div>
-        {% empty %}
-        <p class="text-muted text-center">No comments yet. Be the first to comment!</p>
-        {% endfor %}
     </div>
 </div>
 
