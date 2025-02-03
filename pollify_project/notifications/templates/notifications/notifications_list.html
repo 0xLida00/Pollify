@@ -1,0 +1,61 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="container mt-4">
+    <h2>Your Notifications</h2>
+
+    <!-- Button to mark all as read -->
+    {% if notifications.filter(is_read=False).count %}
+        <button id="mark-all-as-read" class="btn btn-primary mb-3">
+            Mark All as Read
+        </button>
+    {% endif %}
+
+    <!-- Notifications List -->
+    <ul class="list-group mt-3">
+        {% for notification in notifications %}
+            <li class="list-group-item d-flex justify-content-between align-items-start {% if not notification.is_read %}bg-light{% endif %}">
+                <div>
+                    <strong>{{ notification.actor.username }}</strong> {{ notification.verb }}
+                    {% if notification.target_poll %}
+                        <a href="{% url 'poll_detail' notification.target_poll.pk %}">View Poll</a>
+                    {% endif %}
+                    <small class="text-muted d-block">Sent on {{ notification.created_at|date:"M d, Y H:i" }}</small>
+                </div>
+                {% if not notification.is_read %}
+                    <button 
+                        class="btn btn-sm btn-secondary mark-as-read mt-2" 
+                        data-notification-id="{{ notification.id }}">
+                        Mark as Read
+                    </button>
+                {% endif %}
+            </li>
+        {% empty %}
+            <li class="list-group-item text-center">No notifications available.</li>
+        {% endfor %}
+    </ul>
+
+    <!-- Pagination -->
+    {% if is_paginated %}
+    <div class="pagination mt-4 d-flex justify-content-center">
+        {% if page_obj.has_previous %}
+            <a class="btn btn-outline-primary mx-1" href="?page=1">First</a>
+            <a class="btn btn-outline-primary mx-1" href="?page={{ page_obj.previous_page_number }}">Previous</a>
+        {% endif %}
+
+        {% for num in page_obj.paginator.page_range %}
+            {% if page_obj.number == num %}
+                <span class="btn btn-primary mx-1">{{ num }}</span>
+            {% else %}
+                <a class="btn btn-outline-primary mx-1" href="?page={{ num }}">{{ num }}</a>
+            {% endif %}
+        {% endfor %}
+
+        {% if page_obj.has_next %}
+            <a class="btn btn-outline-primary mx-1" href="?page={{ page_obj.next_page_number }}">Next</a>
+            <a class="btn btn-outline-primary mx-1" href="?page={{ page_obj.paginator.num_pages }}">Last</a>
+        {% endif %}
+    </div>
+    {% endif %}
+</div>
+{% endblock %}

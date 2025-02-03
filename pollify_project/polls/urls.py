@@ -8,5 +8,5 @@ urlpatterns = [
     path("<int:pk>/vote/", views.vote_poll, name="vote_poll"),
     path("<int:pk>/delete/", views.PollDeleteView.as_view(), name="poll_delete"),
     path("<int:pk>/edit/", views.PollEditView.as_view(), name="poll_edit"),
-    path("toggle-follow/<int:user_id>/", views.toggle_follow, name="toggle_follow"),
+    path('toggle-follow/<int:user_id>/', views.toggle_follow, name='toggle_follow'),
 ]

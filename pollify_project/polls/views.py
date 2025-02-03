@@ -2,7 +2,7 @@ from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth.decorators import login_required
 from django.utils.decorators import method_decorator
 from django.contrib.auth.mixins import UserPassesTestMixin
-from django.core.paginator import Paginator
+from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
 from django.db.models import Q
 from django.contrib import messages
 from django.forms import ValidationError
@@ -11,6 +11,7 @@ from django.views.generic import ListView, CreateView, DetailView, DeleteView, U
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.http import JsonResponse
 from django.db.models import Count
+from django.db import IntegrityError
 from .models import Poll, Choice, Vote
 from users.models import Follow
 from comments.models import Comment
@@ -18,7 +19,9 @@ from .forms import PollForm
 from users.models import User
 from asgiref.sync import async_to_sync
 from channels.layers import get_channel_layer
+import logging
 
+logger = logging.getLogger(__name__)
 
 # Home view
 def home(request):
@@ -47,14 +50,14 @@ class PollListView(ListView):
         # Ensure filtering works properly
         if filter_by and value:
             if filter_by == "category":
-                queryset = queryset.filter(category__icontains=value)  # Case-insensitive filter
+                queryset = queryset.filter(category__icontains=value)
             elif filter_by == "author":
                 queryset = queryset.filter(author__username__icontains=value)
             elif filter_by == "expires":
                 try:
                     queryset = queryset.filter(expires_at__date=value)
                 except ValueError:
-                    pass  # Ignore invalid date input
+                    pass
 
         # Sorting Logic
         if sort_by == "newest":
@@ -72,6 +75,25 @@ class PollListView(ListView):
         context["filter_by"] = self.request.GET.get("filter_by", "")
         context["value"] = self.request.GET.get("value", "")
         context["sort_by"] = self.request.GET.get("sort_by", "")
+
+        # Fetch and paginate user polls if authenticated
+        if self.request.user.is_authenticated:
+            user_polls_queryset = Poll.objects.filter(author=self.request.user).annotate(total_votes=Count("votes"))
+
+            # Manual pagination for user polls
+            user_poll_page = self.request.GET.get("user_poll_page", 1)
+            paginator = Paginator(user_polls_queryset, 5)  # Show 5 user polls per page
+            try:
+                user_polls = paginator.page(user_poll_page)
+            except PageNotAnInteger:
+                user_polls = paginator.page(1)
+            except EmptyPage:
+                user_polls = paginator.page(paginator.num_pages)
+
+            context["user_polls"] = user_polls
+            context["user_polls_is_paginated"] = paginator.num_pages > 1
+            context["user_polls_page_obj"] = user_polls
+
         return context
 
 
@@ -111,6 +133,7 @@ class PollDetailView(DetailView):
         total_votes = poll.votes.count()
         choices_with_percentages = []
 
+        # Collect choice data with percentages
         for choice in poll.choices.all():
             percentage = (choice.votes_count / total_votes * 100) if total_votes > 0 else 0
             choices_with_percentages.append({
@@ -122,8 +145,11 @@ class PollDetailView(DetailView):
         context["choices_with_percentages"] = choices_with_percentages
         context["total_votes"] = total_votes
         context["can_vote"] = self.request.user.is_authenticated
+
+        # Pass the correct follow status to the template
         if self.request.user.is_authenticated and self.request.user != poll.author:
-            context["is_following"] = poll.author.followers.filter(id=self.request.user.id).exists()
+            context["is_following"] = Follow.objects.filter(follower=self.request.user, followed=poll.author).exists()
+
         return context
 
 
@@ -178,20 +204,22 @@ def vote_poll(request, pk):
 # Follow/Unfollow Author
 @login_required
 def toggle_follow(request, user_id):
-    """Toggle follow/unfollow functionality."""
-    author = get_object_or_404(User, id=user_id)
-    
-    # Check if the user is already following
-    follow_instance = Follow.objects.filter(follower=request.user, followed=author).first()
+    if request.method == "POST":
+        author = get_object_or_404(User, id=user_id)
 
-    if follow_instance:
-        # If following, unfollow the user
-        follow_instance.delete()
-        return JsonResponse({"success": True, "action": "unfollow"})
-    else:
-        # If not following, create a new follow instance
-        Follow.objects.create(follower=request.user, followed=author)
-        return JsonResponse({"success": True, "action": "follow"})
+        # Avoid IntegrityError by ensuring state consistency
+        existing_follow = Follow.objects.filter(follower=request.user, followed=author).first()
+
+        if existing_follow:
+            # Already following, so unfollow
+            existing_follow.delete()
+            return JsonResponse({"success": True, "action": "unfollow"})
+        else:
+            # Not following yet, so follow
+            Follow.objects.get_or_create(follower=request.user, followed=author)  # Avoid duplicate creation
+            return JsonResponse({"success": True, "action": "follow"})
+
+    return JsonResponse({"success": False}, status=400)
 
 
 # Poll Deletion View

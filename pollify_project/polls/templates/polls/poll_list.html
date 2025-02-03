@@ -1,9 +1,10 @@
 {% extends 'base.html' %}
+{% load static %}
+
 {% block content %}
 <div class="container">
     <div class="d-flex justify-content-between align-items-center mb-3">
         <h2 class="mb-0">Available Polls</h2>
-        <a href="{% url 'poll_create' %}" class="btn btn-primary">Create New Poll</a>
     </div>
     <br>
 
@@ -17,11 +18,11 @@
                 <option value="expires" {% if request.GET.filter_by == 'expires' %}selected{% endif %}>Expiring Soon</option>
             </select>
         </div>
-    
+
         <div class="input-group mb-2 mx-2" style="max-width: 250px; margin-top: 8px;">
             <input type="text" name="value" class="form-control align-middle" placeholder="Enter Value" value="{{ request.GET.value }}">
         </div>
-    
+
         <div class="input-group mb-2 mx-2" style="max-width: 250px; margin-top: 8px;">
             <select name="sort_by" class="form-control align-middle">
                 <option value="">-- Sort By --</option>
@@ -30,7 +31,7 @@
                 <option value="most_voted" {% if request.GET.sort_by == 'most_voted' %}selected{% endif %}>Most Voted</option>
             </select>
         </div>
-    
+
         <button type="submit" class="btn btn-primary mx-2 d-flex align-items-center" style="height: 38px;">Apply</button>
         <a href="{% url 'poll_list' %}" class="btn btn-secondary mx-2 d-flex align-items-center" style="height: 38px;">Reset</a>
     </form>
@@ -51,7 +52,7 @@
         {% endfor %}
     </ul>
 
-    <!-- Pagination -->
+    <!-- Pagination for Available Polls -->
     {% if is_paginated %}
     <div class="pagination mt-4 d-flex justify-content-center">
         {% if page_obj.has_previous %}
@@ -73,5 +74,80 @@
         {% endif %}
     </div>
     {% endif %}
+
+    <!-- User Polls Section -->
+    {% if user.is_authenticated and user_polls %}
+    <div class="d-flex justify-content-between align-items-center mb-3">
+        <h3 class="mt-5">Your Polls</h3>
+        <a href="{% url 'poll_create' %}" class="btn btn-primary">Create New Poll</a>
+    </div>
+    <ul class="list-group">
+        {% for poll in user_polls %}
+            <li class="list-group-item d-flex justify-content-between align-items-center">
+                <div>
+                    <a href="{% url 'poll_detail' poll.pk %}">{{ poll.question }}</a>
+                    <br>
+                    <small class="text-muted"><i class="bi bi-folder"></i> Category: {{ poll.category }}</small>
+                </div>
+                <div class="d-flex align-items-center">
+                    <a href="{% url 'poll_edit' poll.pk %}" class="btn btn-sm btn-warning mx-2 d-flex align-items-center">Edit</a>
+                    <button class="btn btn-sm btn-danger mx-2 d-flex align-items-center" data-toggle="modal" data-target="#deletePollModal" data-poll-url="{% url 'poll_delete' poll.pk %}">
+                        Delete
+                    </button>
+                </div>
+            </li>
+        {% endfor %}
+    </ul>
+    {% endif %}
+
+    <!-- Pagination for User Polls -->
+    {% if user_polls_is_paginated %}
+    <div class="pagination mt-4 d-flex justify-content-center">
+        {% if user_polls_page_obj.has_previous %}
+            <a class="btn btn-outline-primary mb-4 mx-1" href="?user_poll_page=1">First</a>
+            <a class="btn btn-outline-primary mb-4 mx-1" href="?user_poll_page={{ user_polls_page_obj.previous_page_number }}">Previous</a>
+        {% endif %}
+
+        {% for num in user_polls_page_obj.paginator.page_range %}
+            {% if user_polls_page_obj.number == num %}
+                <a class="btn btn-primary mb-4 mx-1" href="?user_poll_page={{ num }}">{{ num }}</a>
+            {% elif num > user_polls_page_obj.number|add:"-3" and num < user_polls_page_obj.number|add:"3" %}
+                <a class="btn btn-outline-primary mb-4 mx-1" href="?user_poll_page={{ num }}">{{ num }}</a>
+            {% endif %}
+        {% endfor %}
+
+        {% if user_polls_page_obj.has_next %}
+            <a class="btn btn-outline-primary mb-4 mx-1" href="?user_poll_page={{ user_polls_page_obj.next_page_number }}">Next</a>
+            <a class="btn btn-outline-primary mb-4 mx-1" href="?user_poll_page={{ user_polls_page_obj.paginator.num_pages }}">Last</a>
+        {% endif %}
+    </div>
+    {% endif %}
 </div>
+
+<!-- Modal Template -->
+<div class="modal fade" id="deletePollModal" tabindex="-1" aria-labelledby="deletePollModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="deletePollModalLabel">Confirm Deletion</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                Are you sure you want to delete this poll? This action cannot be undone.
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancel</button>
+                <form id="deletePollForm" method="post">
+                    {% csrf_token %}
+                    <button type="submit" class="btn btn-danger">Yes, Delete</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Include Script -->
+<script src="{% static 'js/poll_list.js' %}"></script>
 {% endblock %}

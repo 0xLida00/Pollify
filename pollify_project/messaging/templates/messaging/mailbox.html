@@ -1,0 +1,26 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="container mt-4">
+    <h2>Your Messages</h2>
+
+    <!-- Tabs for Inbox, Outbox, Compose -->
+    <ul class="nav nav-tabs mt-3">
+        <li class="nav-item">
+            <a class="nav-link {% if active_tab == 'inbox' %}active{% endif %}" href="{% url 'messaging:inbox' %}">Inbox</a>
+        </li>
+        <li class="nav-item">
+            <a class="nav-link {% if active_tab == 'outbox' %}active{% endif %}" href="{% url 'messaging:outbox' %}">Outbox</a>
+        </li>
+        <li class="nav-item">
+            <a class="nav-link {% if active_tab == 'compose' %}active{% endif %}" href="{% url 'messaging:compose_message' %}">Compose</a>
+        </li>
+    </ul>
+
+    <!-- Content Section -->
+    <div class="mt-4">
+        {% block mailbox_content %}
+        {% endblock %}
+    </div>
+</div>
+{% endblock %}

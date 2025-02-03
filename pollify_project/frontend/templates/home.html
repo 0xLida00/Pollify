@@ -11,7 +11,34 @@
             <a href="{% url 'poll_list' %}" class="btn btn-primary me-3 btn-lg">
                 <i class="bi bi-bar-chart"></i> Explore Polls
             </a>
+        </div>
+    </div>
 
+    <!-- Trending Polls Section -->
+    <div class="row justify-content-center mb-5">
+        <div class="col-lg-10">
+            <div class="card shadow border-1 h-100">
+                <div class="card-body">
+                    <h3 class="text-center text-primary mb-4"><i class="bi bi-graph-up"></i> Trending Polls</h3>
+                    {% if trending_polls %}
+                        <ul class="list-group list-group-flush">
+                            {% for poll in trending_polls %}
+                                <li class="list-group-item">
+                                    <div class="d-flex justify-content-between align-items-center">
+                                        <a href="{% url 'poll_detail' poll.pk %}" class="text-decoration-none">{{ poll.question }}</a>
+                                        <span class="badge bg-warning text-dark rounded-pill">{{ poll.vote_count }} Votes, {{ poll.comment_count }} Comments</span>
+                                    </div>
+                                    <div class="text-muted mt-1">
+                                        <small><i class="bi bi-person"></i> Created by: {{ poll.author.username }}</small>
+                                    </div>
+                                </li>
+                            {% endfor %}
+                        </ul>
+                    {% else %}
+                        <p class="text-muted text-center mt-3">No trending polls at the moment. Be the first to make yours go viral!</p>
+                    {% endif %}
+                </div>
+            </div>
         </div>
     </div>
 

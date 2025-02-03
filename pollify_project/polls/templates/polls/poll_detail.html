@@ -17,7 +17,7 @@
                             </a>
                         </small>
                         {% if user.is_authenticated and user != poll.author %}
-                            <form method="post" action="{% url 'toggle_follow' poll.author.id %}" class="ml-2 mb-0 follow-form">
+                            <form method="post" action="{% url 'toggle_follow' poll.author.id %}" class="follow-form">
                                 {% csrf_token %}
                                 <button type="submit" class="btn btn-sm {% if is_following %}btn-danger{% else %}btn-success{% endif %}">
                                     {% if is_following %}Unfollow{% else %}Follow{% endif %}

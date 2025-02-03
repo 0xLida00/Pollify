@@ -1,0 +1,12 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<h2>{{ message.subject }}</h2>
+
+<p><strong>To:</strong> {{ message.recipient.username }}</p>
+<p><strong>Sent on:</strong> {{ message.sent_at|date:"M d, Y H:i" }}</p>
+
+<p>{{ message.body }}</p>
+
+<a href="{% url 'messaging:outbox' %}" class="btn btn-secondary mt-3">Back to Outbox</a>
+{% endblock %}

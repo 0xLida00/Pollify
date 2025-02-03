@@ -27,7 +27,7 @@ SECRET_KEY = 'django-insecure-e!43f16-5n6^r^03$e+sqju-kj)!e$$d*l+h&_+s^(1jaq=a9w
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ['127.0.0.1', 'localhost']
 
 # Login and Logout settings
 LOGIN_URL = '/login/'
@@ -70,7 +70,10 @@ ASGI_APPLICATION = "pollify_project.asgi.application"
 # Configure Redis for WebSocket communication
 CHANNEL_LAYERS = {
     "default": {
-        "BACKEND": "channels.layers.InMemoryChannelLayer",  # Use Redis in production
+        "BACKEND": "channels_redis.core.RedisChannelLayer",
+        "CONFIG": {
+            "hosts": [("127.0.0.1", 6379)],  # Ensure Redis is running
+        },
     },
 }
 
@@ -103,6 +106,8 @@ TEMPLATES = [
                 'django.template.context_processors.request',
                 'django.contrib.auth.context_processors.auth',
                 'django.contrib.messages.context_processors.messages',
+                'messaging.context_processors.unread_messages_count',
+                'notifications.context_processors.unread_notifications_count',
             ],
         },
     },
