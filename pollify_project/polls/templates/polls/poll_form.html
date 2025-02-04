@@ -1,30 +1,45 @@
 {% extends "base.html" %}
+{% load static %}
 
 {% block content %}
-<div class="container mt-5">
+<div class="container mt-5 col-lg-8 col-md-10">
     <h2>Create a New Poll</h2>
+
     <form method="post">
         {% csrf_token %}
+
+        {% if form.non_field_errors %}
+            <div class="alert alert-danger">
+                {{ form.non_field_errors }}
+            </div>
+        {% endif %}
+
         <div class="mb-3">
             {{ form.question.label_tag }}
+            <div class="text-danger">{{ form.question.errors }}</div>
             {{ form.question }}
         </div>
         <div class="mb-3">
             {{ form.description.label_tag }}
+            <div class="text-danger">{{ form.description.errors }}</div>
             {{ form.description }}
         </div>
         <div class="mb-3">
             {{ form.category.label_tag }}
+            <div class="text-danger">{{ form.category.errors }}</div>
             {{ form.category }}
         </div>
         <div class="mb-3">
             {{ form.expires_at.label_tag }}
+            <div class="text-danger">{{ form.expires_at.errors }}</div>
             {{ form.expires_at }}
         </div>
         <div class="mb-3">
             {{ form.choices.label_tag }}
+            <div class="text-danger">{{ form.choices.errors }}</div>
             {{ form.choices }}
         </div>
+
         <button type="submit" class="btn btn-success">Create Poll</button>
     </form>
 </div>

@@ -1,7 +1,8 @@
-from django.http import JsonResponse
-from django.shortcuts import get_object_or_404, redirect
+from django.http import JsonResponse, HttpResponseForbidden
+from django.shortcuts import get_object_or_404, redirect, render
 from django.contrib.auth.decorators import login_required
-from django.views.decorators.csrf import csrf_exempt
+from django.views.decorators.csrf import csrf_exempt, csrf_protect
+from django.contrib import messages
 from polls.models import Poll
 from .models import Comment, CommentVote
 
@@ -55,3 +56,41 @@ def vote_comment(request, comment_id, vote_type):
         return JsonResponse({"success": False, "message": "An error occurred. Please try again later."}, status=500)
 
     return JsonResponse({"success": True, "upvotes": comment.upvotes, "downvotes": comment.downvotes})
+
+@login_required
+@csrf_protect
+def edit_comment(request, comment_id):
+    """Edit an existing comment."""
+    comment = get_object_or_404(Comment, id=comment_id)
+
+    # Ensure only the author can edit the comment
+    if comment.author != request.user:
+        return HttpResponseForbidden("You do not have permission to edit this comment.")
+
+    if request.method == "POST":
+        new_content = request.POST.get("content", "").strip()
+        if new_content:
+            comment.content = new_content
+            comment.save()
+            messages.success(request, "Your comment has been updated successfully.")
+            return redirect("poll_detail", pk=comment.poll.id)
+        else:
+            messages.error(request, "Comment content cannot be empty.")
+
+    return render(request, "comments/edit_comment.html", {"comment": comment})
+
+@login_required
+def delete_comment(request, comment_id):
+    """Delete an existing comment."""
+    comment = get_object_or_404(Comment, id=comment_id)
+
+    # Ensure only the author can delete the comment
+    if comment.author != request.user:
+        return HttpResponseForbidden("You do not have permission to delete this comment.")
+
+    if request.method == "POST":
+        comment.delete()
+        messages.success(request, "Your comment has been deleted successfully.")
+        return redirect("poll_detail", pk=comment.poll.id)
+
+    return render(request, "comments/delete_comment.html", {"comment": comment})

@@ -1,0 +1,16 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="container mt-4">
+    <h2>Edit Comment</h2>
+    <form method="post" class="mt-3">
+        {% csrf_token %}
+        <div class="form-group">
+            <label for="id_content">Content</label>
+            <textarea id="id_content" name="content" class="form-control" rows="5">{{ comment.content }}</textarea>
+        </div>
+        <button type="submit" class="btn btn-primary mt-4">Save Changes</button>
+        <a href="{% url 'poll_detail' comment.poll.id %}" class="btn btn-secondary mt-4">Cancel</a>
+    </form>
+</div>
+{% endblock %}

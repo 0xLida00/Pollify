@@ -2,7 +2,7 @@
 {% load static %}
 
 {% block content %}
-<div class="container-fluid mt-5">
+<div class="container-fluid mt-6">
     <div class="row justify-content-center">
         <div class="col-lg-8 col-md-10">
             <!-- Poll Details -->
@@ -92,7 +92,7 @@
                     <h4 class="mb-0">Comments</h4>
                 </div>
                 <div class="card-body">
-                    <form method="post" action="{% url 'add_comment' poll.pk %}">
+                    <form method="post" action="{% url 'comments:add_comment' poll.pk %}">
                         {% csrf_token %}
                         <div class="mb-3">
                             <textarea name="content" class="form-control" placeholder="Add your comment here..." rows="3" required></textarea>
@@ -106,22 +106,39 @@
             <div class="mt-4">
                 {% for comment in poll.comments.all %}
                 <div class="border rounded p-3 mb-2">
-                    <strong>{{ comment.author.username }}</strong> 
-                    <small class="text-muted">- {{ comment.created_at|date:"F j, Y g:i a" }}</small>
+                    <!-- Comment Header -->
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <strong>{{ comment.author.username }}</strong>
+                            <small class="text-muted">- {{ comment.created_at|date:"F j, Y g:i a" }}</small>
+                        </div>
+            
+                        <!-- Edit and Delete Buttons for Comment Author -->
+                        {% if comment.author == user %}
+                        <div>
+                            <a href="{% url 'comments:edit_comment' comment.id %}" class="btn btn-sm btn-outline-warning me-2">Edit</a>
+                            <a href="{% url 'comments:delete_comment' comment.id %}" class="btn btn-sm btn-outline-danger">Delete</a>
+                        </div>
+                        {% endif %}
+                    </div>
+            
+                    <!-- Comment Content -->
                     <p class="mt-2">{{ comment.content }}</p>
-
-                    <!-- Vote Buttons with More Space & Tooltip -->
-                    <button class="comment-vote btn btn-outline-success btn-sm me-3" 
-                            data-comment-id="{{ comment.id }}" data-action="upvote"
-                            title="Helpful">
-                        👍 <span id="upvote-count-{{ comment.id }}">{{ comment.upvotes }}</span>
-                    </button>
-
-                    <button class="comment-vote btn btn-outline-danger btn-sm" 
-                            data-comment-id="{{ comment.id }}" data-action="downvote"
-                            title="Not Helpful">
-                        👎 <span id="downvote-count-{{ comment.id }}">{{ comment.downvotes }}</span>
-                    </button>
+            
+                    <!-- Vote Buttons Section -->
+                    <div class="mt-2">
+                        <button class="comment-vote btn btn-outline-success btn-sm me-3" 
+                                data-comment-id="{{ comment.id }}" data-action="upvote"
+                                title="Helpful">
+                            👍 <span id="upvote-count-{{ comment.id }}">{{ comment.upvotes }}</span>
+                        </button>
+            
+                        <button class="comment-vote btn btn-outline-danger btn-sm" 
+                                data-comment-id="{{ comment.id }}" data-action="downvote"
+                                title="Not Helpful">
+                            👎 <span id="downvote-count-{{ comment.id }}">{{ comment.downvotes }}</span>
+                        </button>
+                    </div>
                 </div>
                 {% empty %}
                 <p class="text-muted text-center">No comments yet. Be the first to comment!</p>

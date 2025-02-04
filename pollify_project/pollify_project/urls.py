@@ -25,7 +25,7 @@ urlpatterns = [
     path("", home, name="home"),
     path('admin/', admin.site.urls),
     path('polls/', include('polls.urls')),
-    path('comments/', include('comments.urls')),
+    path('comments/', include('comments.urls', namespace='comments')),
     path('users', include('users.urls')),
     path('notifications/', include('notifications.urls')),
     path('messaging/', include('messaging.urls')),

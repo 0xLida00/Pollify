@@ -105,15 +105,21 @@ class PollCreateView(LoginRequiredMixin, CreateView):
     success_url = reverse_lazy("poll_list")
 
     def form_valid(self, form):
+        # Validate choices before saving the poll
+        choices_text = form.cleaned_data["choices"]
+        choices = [choice.strip() for choice in choices_text.split("\n") if choice.strip()]
+
+        # Check if there are at least two choices
+        if len(choices) < 2:
+            form.add_error("choices", "You must provide at least two choices on separate lines.")
+            return self.form_invalid(form)
+
+        # Save poll only after validation succeeds
         poll = form.save(commit=False)
         poll.author = self.request.user
         poll.save()
 
-        choices_text = form.cleaned_data["choices"]
-        choices = [choice.strip() for choice in choices_text.split("\n") if choice.strip()]
-        if len(choices) < 2:
-            raise ValidationError("You must provide at least two choices.")
-
+        # Save each choice for the poll
         for choice_text in choices:
             Choice.objects.create(poll=poll, choice_text=choice_text)
 
