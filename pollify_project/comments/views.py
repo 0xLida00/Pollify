@@ -1,7 +1,9 @@
 from django.http import JsonResponse, HttpResponseForbidden
 from django.shortcuts import get_object_or_404, redirect, render
+from django.db import IntegrityError
 from django.contrib.auth.decorators import login_required
 from django.views.decorators.csrf import csrf_exempt, csrf_protect
+from admin_panel.utils import log_activity
 from django.contrib import messages
 from polls.models import Poll
 from .models import Comment, CommentVote
@@ -14,9 +16,10 @@ def add_comment(request, poll_id):
         content = request.POST.get("content", "").strip()  # Remove leading/trailing whitespace
         if content:  # Ensure content is not empty
             Comment.objects.create(poll=poll, author=request.user, content=content)
+            # Log the activity here
+            log_activity(request.user, f"Added a comment to poll: {poll.question}")
         return redirect("poll_detail", pk=poll_id)
 
-from django.db import IntegrityError
 
 @csrf_exempt
 @login_required
@@ -91,6 +94,7 @@ def delete_comment(request, comment_id):
     if request.method == "POST":
         comment.delete()
         messages.success(request, "Your comment has been deleted successfully.")
+        log_activity(request.user, "Deleted a comment")
         return redirect("poll_detail", pk=comment.poll.id)
 
     return render(request, "comments/delete_comment.html", {"comment": comment})

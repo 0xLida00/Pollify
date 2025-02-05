@@ -11,7 +11,7 @@ from django.views.generic import ListView, CreateView, DetailView, DeleteView, U
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.http import JsonResponse
 from django.db.models import Count
-from django.db import IntegrityError
+from admin_panel.utils import log_activity
 from .models import Poll, Choice, Vote
 from users.models import Follow
 from comments.models import Comment
@@ -123,6 +123,9 @@ class PollCreateView(LoginRequiredMixin, CreateView):
         for choice_text in choices:
             Choice.objects.create(poll=poll, choice_text=choice_text)
 
+        # Log the activity here
+        log_activity(self.request.user, f"Created a new poll: {poll.question}")
+
         messages.success(self.request, "Poll created successfully!")
         return redirect(self.success_url)
 
@@ -193,6 +196,9 @@ def vote_poll(request, pk):
         Vote.objects.create(poll=poll, choice=choice, voter=request.user)
         choice.votes_count += 1
         choice.save()
+
+        # Log the activity here
+        log_activity(request.user, f"Voted on poll: {poll.question}")
 
         # Send WebSocket update
         channel_layer = get_channel_layer()

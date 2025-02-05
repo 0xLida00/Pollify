@@ -4,6 +4,7 @@ from django.contrib.auth.decorators import login_required
 from django.contrib import messages
 from django.http import JsonResponse
 from django.contrib.auth.forms import PasswordChangeForm
+from admin_panel.utils import log_activity
 from .models import User, Follow
 from .forms import ProfileUpdateForm, CustomSignupForm, UserUpdateForm
 
@@ -110,3 +111,9 @@ def password_change(request):
         form = PasswordChangeForm(user=request.user)
 
     return render(request, 'users/password_change.html', {'form': form})
+
+
+def update_profile(request):
+    if request.method == 'POST':
+        # Update profile logic here...
+        log_activity(request.user, 'Updated profile')

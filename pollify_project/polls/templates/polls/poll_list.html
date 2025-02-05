@@ -5,6 +5,9 @@
 <div class="container">
     <div class="d-flex justify-content-between align-items-center mb-3">
         <h2 class="mb-0">Available Polls</h2>
+        <div class="d-flex justify-content-between align-items-center mb-3">
+            <a href="{% url 'poll_create' %}" class="btn btn-primary">Create New Poll</a>
+        </div>
     </div>
     <br>
 
@@ -79,7 +82,6 @@
     {% if user.is_authenticated and user_polls %}
     <div class="d-flex justify-content-between align-items-center mb-3">
         <h3 class="mt-5">Your Polls</h3>
-        <a href="{% url 'poll_create' %}" class="btn btn-primary">Create New Poll</a>
     </div>
     <ul class="list-group">
         {% for poll in user_polls %}
