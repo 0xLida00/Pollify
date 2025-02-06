@@ -12,32 +12,32 @@ User = get_user_model()
 @login_required
 def inbox(request):
     """View for the user's inbox."""
-    messages_list = request.user.received_messages.order_by('-sent_at')
-    paginator = Paginator(messages_list, 10)  # Show 10 messages per page
+    mailbox_messages = request.user.received_messages.order_by('-sent_at')
+    paginator = Paginator(mailbox_messages, 10)  # Show 10 messages per page
     page_number = request.GET.get('page', 1)
     messages_page = paginator.get_page(page_number)
 
     return render(request, 'messaging/inbox.html', {
-        'messages': messages_page,
+        'mailbox_messages': messages_page,
         'is_paginated': paginator.num_pages > 1,
         'page_obj': messages_page,
-        'active_tab': 'inbox',  # Highlight the 'Inbox' tab
+        'active_tab': 'inbox',
     })
 
 
 @login_required
 def outbox(request):
     """View for the user's sent messages."""
-    messages_list = request.user.sent_messages.order_by('-sent_at')
-    paginator = Paginator(messages_list, 10)  # Show 10 messages per page
+    mailbox_messages = request.user.sent_messages.order_by('-sent_at')
+    paginator = Paginator(mailbox_messages, 10)  # Show 10 messages per page
     page_number = request.GET.get('page', 1)
     messages_page = paginator.get_page(page_number)
 
     return render(request, 'messaging/outbox.html', {
-        'messages': messages_page,
+        'mailbox_messages': messages_page,
         'is_paginated': paginator.num_pages > 1,
         'page_obj': messages_page,
-        'active_tab': 'outbox',  # Highlight the 'Outbox' tab
+        'active_tab': 'outbox',
     })
 
 
@@ -92,5 +92,5 @@ def message_detail(request, message_id):
     
     return render(request, 'messaging/message_detail.html', {
         'message': message,
-        'active_tab': 'outbox',  # Ensure the user returns to the outbox context
+        'active_tab': 'outbox',
     })

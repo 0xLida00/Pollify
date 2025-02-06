@@ -12,7 +12,7 @@
                  alt="Profile Image" width="150" height="150">
         {% else %}
             <img class="rounded-circle account-img mb-3" 
-                 src="{% static 'img/default.jpg' %}" 
+                 src="{% static 'img/default.png' %}" 
                  alt="Default Profile Image" width="150" height="150">
         {% endif %}
 
@@ -24,9 +24,9 @@
     <div class="text-center mt-4">
         <p><strong>{{ followers }} Followers</strong> | <strong>{{ following }} Following</strong></p>
         
-        <!-- Follow/Unfollow Button -->
+        <!-- Follow/Unfollow Button with AJAX handling -->
         {% if user.is_authenticated and user != user_profile %}
-            <form method="post" action="{% url 'toggle_follow' user_profile.id %}" class="d-inline-block">
+            <form method="post" action="{% url 'toggle_follow' user_profile.id %}" class="follow-form">
                 {% csrf_token %}
                 <button type="submit" class="btn btn-sm {% if is_following %}btn-danger{% else %}btn-success{% endif %}">
                     {% if is_following %}Unfollow{% else %}Follow{% endif %}

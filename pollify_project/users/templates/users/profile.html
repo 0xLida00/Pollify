@@ -12,7 +12,7 @@
                  alt="Profile Image" width="150" height="150">
         {% else %}
             <img class="rounded-circle account-img mb-3" 
-                 src="{% static 'img/default.jpg' %}" 
+                 src="{% static 'img/default.png' %}" 
                  alt="Default Profile Image" width="150" height="150">
         {% endif %}
 
@@ -21,6 +21,19 @@
         {% if user.bio %}
             <p class="mt-2">{{ user.bio }}</p>
         {% endif %}
+    </div>
+
+    <!-- Follower and Following Counts -->
+    <div class="d-flex justify-content-center align-items-center mt-4">
+        <div class="text-center mx-3">
+            <h5 class="mb-1 text-success"><strong>{{ followers }}</strong></h5>
+            <p><strong>Followers</strong></p>
+        </div>
+        <div class="vr mx-3"></div> <!-- Vertical separator -->
+        <div class="text-center mx-3">
+            <h5 class="mb-1 text-info"><strong>{{ following }}</strong></h5>
+            <p><strong>Following</strong></p>
+        </div>
     </div>
 
     <!-- Update Profile Form -->

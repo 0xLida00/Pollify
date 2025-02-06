@@ -10,5 +10,4 @@ class Message(models.Model):
     is_read = models.BooleanField(default=False)
 
     def __str__(self):
-        unread_count = self.recipient.received_messages.filter(is_read=False).count()
-        return f"You have {unread_count} unread messages."
+        return self.subject

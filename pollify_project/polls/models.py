@@ -64,7 +64,7 @@ class Poll(models.Model):
         return self.expires_at and self.expires_at < timezone.now()
 
     def get_absolute_url(self):
-        return reverse('poll_detail', kwargs={'pk': self.pk})  # Redirects to the detail view of the poll
+        return reverse('poll_detail', kwargs={'pk': self.pk})
 
 
 class Choice(models.Model):

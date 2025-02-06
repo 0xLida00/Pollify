@@ -4,12 +4,7 @@ from django.contrib.auth import get_user_model
 User = get_user_model()
 
 class Comment(models.Model):
-    poll = models.ForeignKey(
-        "polls.Poll",
-        on_delete=models.CASCADE,
-        related_name="comments",
-        help_text="The poll this comment belongs to."
-    )
+    poll = models.ForeignKey("polls.Poll", on_delete=models.CASCADE, related_name="comments", help_text="The poll this comment belongs to.")
     author = models.ForeignKey(User, on_delete=models.CASCADE, help_text="User who created the comment.")
     content = models.TextField(help_text="Content of the comment.")
     created_at = models.DateTimeField(auto_now_add=True)

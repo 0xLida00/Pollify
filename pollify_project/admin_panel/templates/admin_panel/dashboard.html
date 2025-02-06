@@ -33,7 +33,7 @@
     </div>
 
     <!-- Recent Activity Logs -->
-    <h3 class="mt-5">Recent Activity</h3>
+    <h3 class="mt-5">Activity Logs</h3>
     <table class="table table-striped mt-3">
         <thead>
             <tr>
@@ -51,10 +51,43 @@
             </tr>
             {% empty %}
             <tr>
-                <td colspan="3">No recent activity found.</td>
+                <td colspan="3" class="text-center">No recent activity found.</td>
             </tr>
             {% endfor %}
         </tbody>
     </table>
+
+    <!-- Pagination Controls -->
+    {% if recent_activity.has_other_pages %}
+    <nav class="mt-4">
+        <ul class="pagination justify-content-center">
+            {% if recent_activity.has_previous %}
+                <li class="page-item">
+                    <a class="page-link" href="?page=1">&laquo; First</a>
+                </li>
+                <li class="page-item">
+                    <a class="page-link" href="?page={{ recent_activity.previous_page_number }}">Previous</a>
+                </li>
+            {% endif %}
+
+            {% for num in recent_activity.paginator.page_range %}
+                {% if recent_activity.number == num %}
+                    <li class="page-item active"><span class="page-link">{{ num }}</span></li>
+                {% elif num >= recent_activity.number|add:'-2' and num <= recent_activity.number|add:'2' %}
+                    <li class="page-item"><a class="page-link" href="?page={{ num }}">{{ num }}</a></li>
+                {% endif %}
+            {% endfor %}
+
+            {% if recent_activity.has_next %}
+                <li class="page-item">
+                    <a class="page-link" href="?page={{ recent_activity.next_page_number }}">Next</a>
+                </li>
+                <li class="page-item">
+                    <a class="page-link" href="?page={{ recent_activity.paginator.num_pages }}">Last &raquo;</a>
+                </li>
+            {% endif %}
+        </ul>
+    </nav>
+    {% endif %}
 </div>
 {% endblock %}

@@ -49,6 +49,7 @@ def profile(request, username):
                 u_form.save()
                 p_form.save()
                 messages.success(request, "Profile updated successfully.")
+                log_activity(request.user, "Updated their profile.")
                 return redirect('profile', username=request.user.username)
         else:
             u_form = UserUpdateForm(instance=request.user)
@@ -64,6 +65,7 @@ def profile(request, username):
         })
     else:
         # View-only profile for other users
+        log_activity(request.user, f"Viewed profile of {user_profile.username}.")
         return render(request, 'users/profile_view_only.html', {
             'user_profile': user_profile,
             'followers': followers,
@@ -72,21 +74,24 @@ def profile(request, username):
         })
 
 
+# Follow/Unfollow Author or User Profile
 @login_required
-def follow_user(request, user_id):
+def toggle_follow(request, user_id):
     if request.method == "POST":
-        user_to_follow = get_object_or_404(User, id=user_id)
-        request.user.following.add(user_to_follow)
-        return JsonResponse({"success": True})
-    return JsonResponse({"success": False}, status=400)
+        user_to_toggle = get_object_or_404(User, id=user_id)
 
+        # Check existing follow relationship
+        existing_follow = Follow.objects.filter(follower=request.user, followed=user_to_toggle).first()
 
-@login_required
-def unfollow_user(request, user_id):
-    if request.method == "POST":
-        user_to_unfollow = get_object_or_404(User, id=user_id)
-        request.user.following.remove(user_to_unfollow)
-        return JsonResponse({"success": True})
+        if existing_follow:
+            # If already following, unfollow
+            existing_follow.delete()
+            return JsonResponse({"success": True, "action": "unfollow"})
+        else:
+            # If not following, follow
+            Follow.objects.get_or_create(follower=request.user, followed=user_to_toggle)
+            return JsonResponse({"success": True, "action": "follow"})
+
     return JsonResponse({"success": False}, status=400)
 
 
@@ -104,6 +109,7 @@ def password_change(request):
             form.save()
             update_session_auth_hash(request, form.user)
             messages.success(request, "Your password has been changed successfully.")
+            log_activity(request.user, "Changed their password.")
             return redirect('profile', username=request.user.username)
         else:
             messages.error(request, "Please correct the error(s) below.")
@@ -113,7 +119,15 @@ def password_change(request):
     return render(request, 'users/password_change.html', {'form': form})
 
 
+@login_required
 def update_profile(request):
     if request.method == 'POST':
-        # Update profile logic here...
-        log_activity(request.user, 'Updated profile')
+        u_form = UserUpdateForm(request.POST, instance=request.user)
+        p_form = ProfileUpdateForm(request.POST, request.FILES, instance=request.user)
+        if u_form.is_valid() and p_form.is_valid():
+            u_form.save()
+            p_form.save()
+            messages.success(request, "Profile updated successfully.")
+            log_activity(request.user, "Updated their profile.")
+            return redirect('profile', username=request.user.username)
+    return render(request, 'users/profile_update.html', {'u_form': u_form, 'p_form': p_form})
