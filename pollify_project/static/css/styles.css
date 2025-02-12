@@ -1,0 +1,167 @@
+/* General Reset */
+body, html {
+    margin: 0;
+    padding: 0;
+    height: 100%;
+}
+
+/* Flexbox Layout Setup */
+body {
+    display: flex;
+    flex-direction: column;
+    min-height: 100vh;
+}
+
+/* Smooth Scrolling */
+html {
+    scroll-behavior: smooth;
+}
+
+/* Header and Navbar Styling */
+header {
+    padding: 4px 0;
+    background-color: #343a40;
+    color: white;
+    position: sticky;
+    top: 0;
+    z-index: 100;
+}
+
+.header-container {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+
+.header-container h1 {
+    font-size: 1.5rem;
+    margin: 0;
+    padding: 0 10px;
+    font-weight: bold;
+}
+
+.navbar {
+    background-color: transparent !important;
+    box-shadow: none;
+}
+
+.navbar-nav {
+    display: flex;
+    align-items: center;
+}
+
+.navbar .nav-link {
+    font-size: 1rem;
+    padding: 5px 15px;
+    color: white !important;
+    transition: color 0.3s ease-in-out;
+}
+
+.navbar .nav-link:hover {
+    color: #527ad2 !important;
+}
+
+.bell-icon {
+    font-size: 1rem;  /* Increase icon size */
+    margin-right: 2px;
+    margin-top: 5px;
+    margin-left: 0;
+}
+
+.profile-picture {
+    margin-right: -25px;
+}
+
+.notification-badge {
+    font-size: 0.8rem;
+    color: yellow;
+}
+
+/* Main Content Styling */
+.main-content {
+    flex: 1;
+    margin-top: 10px;
+}
+
+/* Username Styling */
+.username-link {
+    color: #e0e0e0;
+    text-decoration: underline;
+}
+
+.username-link:hover {
+    color: #ffc107;
+    text-decoration: none;
+}
+
+input[type="datetime-local"] {
+    display: inline-block;
+    width: auto;
+}
+
+button.btn-success {
+    vertical-align: middle;
+}
+
+.unread-message {
+    background-color: #d4edda; /* Light green color */
+    border: 1px solid #c3e6cb;
+}
+
+.text-truncate {
+    overflow: hidden;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+    max-width: 100%; /* Adjust this to fit your layout */
+    display: inline-block;
+    vertical-align: middle;
+}
+
+/* Footer Styling - Sticky Footer */
+.footer {
+    padding: 10px 0;
+    background-color: #343a40 !important;
+    color: white;
+    position: relative;
+    bottom: 0;
+    width: 100%;
+    text-align: center;
+    z-index: 100;
+}
+
+.footer .list-inline-item a {
+    font-size: 1.2rem;
+    margin: 0 10px;
+    transition: color 0.3s ease-in-out;
+}
+
+.footer .list-inline-item a:hover {
+    color: #FFD700;
+}
+
+/* Flash Message Styling */
+.flash-container {
+    margin-bottom: 15px;
+    padding: 10px;
+    border-radius: 5px;
+}
+
+/* Utility Classes for Responsive Adjustments */
+@media (max-width: 991px) {
+    .header-container {
+        flex-direction: column;
+        text-align: center;
+    }
+
+    .header-container h1 {
+        margin-bottom: 8px;
+    }
+
+    .navbar-nav {
+        flex-direction: column;
+    }
+
+    .footer .list-inline {
+        padding-top: 10px;
+    }
+}
