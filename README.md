@@ -93,7 +93,7 @@ python manage.py test messaging
 python manage.py test polls
 ---
 
-## VI/ 📌 To-Do / Future Enhancements
+## V/ 📌 To-Do / Future Enhancements
 	•	Add poll analytics & insights
 	•	Implement poll sharing feature
 	•	Improve UI/UX for mobile responsiveness
@@ -101,7 +101,7 @@ python manage.py test polls
 	•	Enable real-time updates using WebSockets
 ---
 
-### VII/ 🤝 Contribution
+### VI/ 🤝 Contribution
 Contributions are welcome! Follow these steps to contribute:
 	1.	Fork the repo.
 	2.	Create a new branch: git checkout -b feature-new-feature
@@ -110,7 +110,7 @@ Contributions are welcome! Follow these steps to contribute:
 	5.	Open a Pull Request
 ---
 
-## V/ 📁 Project Structure
+## VII/ 📁 Project Structure
 ```
 pollify_project/
 │── admin_panel/        # Admin dashboard module
