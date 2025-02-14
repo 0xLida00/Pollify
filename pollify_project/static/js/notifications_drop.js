@@ -1,33 +1,36 @@
 document.addEventListener('DOMContentLoaded', function () {
-    // Initialize Bootstrap 4 dropdowns
-    $('.dropdown-toggle').dropdown();
+    console.log("🔽 Notifications JS Loaded");
 
-    // Auto-close dropdown when clicking outside
-    document.addEventListener('click', function (event) {
-        const openDropdown = document.querySelector('.dropdown.show');
-
-        if (openDropdown) {
-            const dropdownToggle = openDropdown.querySelector('.dropdown-toggle');
-
-            if (!openDropdown.contains(event.target)) {
-                $(dropdownToggle).dropdown('hide');  // Use jQuery to close the dropdown if clicked outside
-            }
+    // ✅ Ensure Bootstrap Dropdown is properly initialized
+    $('.dropdown-toggle').each(function () {
+        let $dropdown = $(this);
+        if (!$dropdown.data('bs.dropdown')) {
+            $dropdown.dropdown(); // Initialize if not already done
         }
     });
 
-    // Prevent default dropdown toggle if it doesn't open correctly
+    // ✅ Handle dropdown toggle manually if needed
     document.querySelectorAll('.dropdown-toggle').forEach(toggle => {
         toggle.addEventListener('click', function (event) {
-            event.preventDefault();  // Avoid default behavior that may interfere with dropdown
-            $(this).dropdown('toggle');  // Manually toggle the dropdown
+            console.log("🔽 Dropdown Clicked");
+            event.stopPropagation(); // Prevent immediate closing
         });
     });
 
-    // Handle "Mark as Read" action via AJAX
-    document.querySelectorAll('.mark-as-read').forEach(button => {
-        button.addEventListener('click', function (event) {
+    // ✅ Close dropdown when clicking outside
+    document.addEventListener('click', function (event) {
+        const openDropdown = document.querySelector('.dropdown.show');
+        if (openDropdown && !openDropdown.contains(event.target)) {
+            console.log("🔽 Closing dropdown due to outside click");
+            $(openDropdown.querySelector('.dropdown-toggle')).dropdown('hide');
+        }
+    });
+
+    // ✅ Handle "Mark as Read" action via AJAX
+    document.addEventListener('click', function (event) {
+        if (event.target.classList.contains('mark-as-read')) {
             event.preventDefault();
-            const notificationId = this.dataset.notificationId;
+            const notificationId = event.target.dataset.notificationId;
 
             fetch(`/notifications/mark-as-read/${notificationId}/`, {
                 method: 'POST',
@@ -39,19 +42,17 @@ document.addEventListener('DOMContentLoaded', function () {
             .then(response => response.json())
             .then(data => {
                 if (data.success) {
-                    const listItem = this.closest('.list-group-item');
-                    if (listItem) {
-                        listItem.classList.remove('bg-light');
-                        this.remove();
-                    }
-                    updateNotificationBadgeCount();
+                    console.log(`✅ Notification ${notificationId} marked as read`);
+                    event.target.closest('.list-group-item').classList.remove('bg-light');
+                    event.target.remove(); // Remove "Mark as Read" button
+                    updateNotificationBadgeCount(); // Update badge count
                 }
             })
-            .catch(error => console.error('Error:', error));
-        });
+            .catch(error => console.error('❌ Error marking notification as read:', error));
+        }
     });
 
-    // Handle "Mark All as Read" action via AJAX
+    // ✅ Handle "Mark All as Read" action via AJAX
     document.getElementById('mark-all-as-read')?.addEventListener('click', function (event) {
         event.preventDefault();
 
@@ -65,25 +66,27 @@ document.addEventListener('DOMContentLoaded', function () {
         .then(response => response.json())
         .then(data => {
             if (data.success) {
+                console.log("✅ All notifications marked as read");
                 document.querySelectorAll('.mark-as-read').forEach(button => button.remove());
                 document.querySelectorAll('.list-group-item.bg-light').forEach(item => item.classList.remove('bg-light'));
-                updateNotificationBadgeCount(0);
+                updateNotificationBadgeCount(0); // Reset the count
             }
         })
-        .catch(error => console.error('Error marking all notifications as read:', error));
+        .catch(error => console.error('❌ Error marking all notifications as read:', error));
     });
 
-    // Function to update the notification badge count
+    // ✅ Function to update the notification badge count dynamically
     function updateNotificationBadgeCount(newCount = null) {
         const badge = document.querySelector('#notificationDropdown .notification-badge');
         if (badge) {
             let count = newCount !== null ? newCount : (parseInt(badge.textContent, 10) || 0) - 1;
+            count = count < 0 ? 0 : count; // Ensure count never goes negative
             badge.textContent = count > 0 ? count : '';
             badge.style.display = count > 0 ? 'inline-block' : 'none';
         }
     }
 
-    // Helper function to get CSRF token
+    // ✅ Helper function to get CSRF token
     function getCookie(name) {
         const cookies = document.cookie.split('; ');
         for (let i = 0; i < cookies.length; i++) {

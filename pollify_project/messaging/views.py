@@ -11,9 +11,17 @@ User = get_user_model()
 
 @login_required
 def inbox(request):
-    """View for the user's inbox."""
-    mailbox_messages = request.user.received_messages.order_by('-sent_at')
-    paginator = Paginator(mailbox_messages, 10)  # Show 10 messages per page
+    """View for the user's inbox with filtering and pagination."""
+    filter_param = request.GET.get('filter', 'all')
+
+    # Filter messages by the recipients field
+    mailbox_messages = Message.objects.filter(recipients=request.user).order_by('-sent_at')
+
+    # Apply filter for unread messages if requested
+    if filter_param == 'unread':
+        mailbox_messages = mailbox_messages.filter(is_read=False)
+
+    paginator = Paginator(mailbox_messages, 10)
     page_number = request.GET.get('page', 1)
     messages_page = paginator.get_page(page_number)
 
@@ -22,6 +30,7 @@ def inbox(request):
         'is_paginated': paginator.num_pages > 1,
         'page_obj': messages_page,
         'active_tab': 'inbox',
+        'filter_param': filter_param,
     })
 
 
@@ -43,25 +52,18 @@ def outbox(request):
 
 @login_required
 def compose_message(request):
-    """View to compose a new message."""
-    initial_data = {}
-    recipient_id = request.GET.get('recipient')
-
-    # Pre-fill recipient if provided in query params
-    if recipient_id:
-        initial_data['recipient'] = get_object_or_404(User, id=recipient_id)
-
+    """View to compose a new message with support for multiple recipients."""
     if request.method == 'POST':
         form = ComposeMessageForm(request.POST, sender=request.user)
         if form.is_valid():
             message = form.save(commit=False)
             message.sender = request.user
             message.save()
-            # Use a one-time success flash message
+            form.save_m2m()  # Save recipients
             flash_messages.success(request, 'Your message has been sent successfully.')
-            return redirect('messaging:inbox')
+            return redirect('messaging:inbox')  # Ensure redirection happens
     else:
-        form = ComposeMessageForm(initial=initial_data, sender=request.user)
+        form = ComposeMessageForm(sender=request.user)
 
     return render(request, 'messaging/compose_message.html', {
         'form': form,
@@ -72,8 +74,8 @@ def compose_message(request):
 @login_required
 def read_message(request, message_id):
     """View a specific message received by the user."""
-    message = get_object_or_404(Message, id=message_id, recipient=request.user)
-    
+    message = get_object_or_404(Message, id=message_id, recipients=request.user)
+
     # Mark the message as read if it hasn't been read yet
     if not message.is_read:
         message.is_read = True
@@ -81,7 +83,7 @@ def read_message(request, message_id):
 
     return render(request, 'messaging/read_message.html', {
         'message': message,
-        'active_tab': 'inbox',  # Ensure the user returns to the inbox context
+        'active_tab': 'inbox',
     })
 
 

@@ -1,12 +1,13 @@
 {% extends 'base.html' %}
+{% load static %}
 
 {% block content %}
 <div class="container mt-4">
     <h2>Your Notifications</h2>
 
     <!-- Button to mark all as read -->
-    {% if notifications.filter(is_read=False).count %}
-        <button id="mark-all-as-read" class="btn btn-primary mb-3">
+    {% if unread_notifications_count > 0 %}
+        <button id="mark-all-as-read" class="btn btn-primary mt-3">
             Mark All as Read
         </button>
     {% endif %}

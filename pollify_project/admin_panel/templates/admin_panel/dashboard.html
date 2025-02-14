@@ -57,7 +57,7 @@
         </tbody>
     </table>
 
-    <!-- Pagination Controls -->
+    <!-- Pagination Links -->
     {% if recent_activity.has_other_pages %}
     <nav class="mt-4">
         <ul class="pagination justify-content-center">
@@ -71,7 +71,7 @@
             {% endif %}
 
             {% for num in recent_activity.paginator.page_range %}
-                {% if recent_activity.number == num %}
+                {% if num == recent_activity.number %}
                     <li class="page-item active"><span class="page-link">{{ num }}</span></li>
                 {% elif num >= recent_activity.number|add:'-2' and num <= recent_activity.number|add:'2' %}
                     <li class="page-item"><a class="page-link" href="?page={{ num }}">{{ num }}</a></li>

@@ -1,7 +1,19 @@
 {% extends 'messaging/mailbox.html' %}
+
 {% block mailbox_content %}
+<!-- Filter Options -->
+<div class="mt-3 d-flex justify-content-center">
+    <a href="?filter=all" class="btn btn-outline-primary mx-2 {% if filter_param == 'all' %}active{% endif %}">
+        All Messages
+    </a>
+    <a href="?filter=unread" class="btn btn-outline-primary mx-2 {% if filter_param == 'unread' %}active{% endif %}">
+        Unread Messages
+    </a>
+</div>
+
 <h3>Inbox</h3>
 
+<!-- Paginated Messages -->
 {% if mailbox_messages %}
     <ul class="list-group mt-3">
         {% for message in mailbox_messages %}
@@ -12,6 +24,39 @@
             </li>
         {% endfor %}
     </ul>
+
+    <!-- Pagination Controls -->
+    {% if is_paginated %}
+        <nav class="mt-4">
+            <ul class="pagination justify-content-center">
+                {% if page_obj.has_previous %}
+                    <li class="page-item">
+                        <a class="page-link" href="?page=1&filter={{ filter_param }}">&laquo; First</a>
+                    </li>
+                    <li class="page-item">
+                        <a class="page-link" href="?page={{ page_obj.previous_page_number }}&filter={{ filter_param }}">Previous</a>
+                    </li>
+                {% endif %}
+
+                {% for num in page_obj.paginator.page_range %}
+                    {% if page_obj.number == num %}
+                        <li class="page-item active"><span class="page-link">{{ num }}</span></li>
+                    {% elif num >= page_obj.number|add:'-2' and num <= page_obj.number|add:'2' %}
+                        <li class="page-item"><a class="page-link" href="?page={{ num }}&filter={{ filter_param }}">{{ num }}</a></li>
+                    {% endif %}
+                {% endfor %}
+
+                {% if page_obj.has_next %}
+                    <li class="page-item">
+                        <a class="page-link" href="?page={{ page_obj.next_page_number }}&filter={{ filter_param }}">Next</a>
+                    </li>
+                    <li class="page-item">
+                        <a class="page-link" href="?page={{ page_obj.paginator.num_pages }}&filter={{ filter_param }}">Last &raquo;</a>
+                    </li>
+                {% endif %}
+            </ul>
+        </nav>
+    {% endif %}
 {% else %}
     <p>No messages in your inbox.</p>
 {% endif %}

@@ -34,11 +34,10 @@ db.sqlite3
 media/
 
 # Ignore migrations except __init__.py
-**/migrations/*.py
+**/migrations/*.pyc
 !**/migrations/__init__.py
 
 # Static files (build artifacts)
-static/
 staticfiles/
 static_root/
 

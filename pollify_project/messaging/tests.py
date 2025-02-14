@@ -13,10 +13,11 @@ class MessagingTests(TestCase):
         # Create a test message
         self.message = Message.objects.create(
             sender=self.sender,
-            recipient=self.recipient,
             subject='Test Message',
             body='This is a test message body.'
         )
+        # Add recipient to the message
+        self.message.recipients.add(self.recipient)
 
     def test_inbox_view_status_code(self):
         """Test that the inbox view returns a 200 status code for the recipient."""
@@ -61,14 +62,16 @@ class MessagingTests(TestCase):
         """Test that a message can be sent through the compose view."""
         self.client.login(username='sender', password='password')
         response = self.client.post(reverse('messaging:compose_message'), {
-            'recipient': self.recipient.id,
+            'recipients': [self.recipient.id],  # Send the recipients as a list
             'subject': 'New Test Message',
             'body': 'This is a new message.'
         })
         self.assertEqual(response.status_code, 302)  # Redirects to inbox after sending
+
+        # Verify that the message was created
         new_message = Message.objects.get(subject='New Test Message')
         self.assertEqual(new_message.sender, self.sender)
-        self.assertEqual(new_message.recipient, self.recipient)
+        self.assertTrue(new_message.recipients.filter(id=self.recipient.id).exists())
 
     def test_empty_inbox(self):
         """Test that the inbox displays a message when there are no messages."""

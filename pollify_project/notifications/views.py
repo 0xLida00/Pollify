@@ -8,6 +8,7 @@ from .models import Notification
 def notifications_list(request):
     """Display all notifications with pagination."""
     notifications = request.user.notifications.order_by('-created_at')
+    unread_count = notifications.filter(is_read=False).count()  # Get unread notifications count
     page_number = request.GET.get('page', 1)
     paginator = Paginator(notifications, 10)  # Show 10 notifications per page
 
@@ -18,6 +19,7 @@ def notifications_list(request):
 
     return render(request, 'notifications/notifications_list.html', {
         'notifications': notifications_page,
+        'unread_notifications_count': unread_count,  # Pass unread count
         'is_paginated': paginator.num_pages > 1,
         'paginator': paginator,
         'page_obj': notifications_page
