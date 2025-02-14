@@ -93,7 +93,25 @@ python manage.py test messaging
 python manage.py test polls
 ---
 
+## VI/ 📌 To-Do / Future Enhancements
+	•	Add poll analytics & insights
+	•	Implement poll sharing feature
+	•	Improve UI/UX for mobile responsiveness
+	•	Introduce more notification types
+	•	Enable real-time updates using WebSockets
+---
+
+### VII/ 🤝 Contribution
+Contributions are welcome! Follow these steps to contribute:
+	1.	Fork the repo.
+	2.	Create a new branch: git checkout -b feature-new-feature
+	3.	Commit changes: git commit -m "Added new feature"
+	4.	Push to branch: git push origin feature-new-feature
+	5.	Open a Pull Request
+---
+
 ## V/ 📁 Project Structure
+```
 pollify_project/
 │── admin_panel/        # Admin dashboard module
 │── comments/           # Poll comment system
@@ -107,18 +125,3 @@ pollify_project/
 │── manage.py           # Django project management script
 │── requirements.txt    # Dependencies
 │── README.md           # Project documentation
-
-## VI/ 📌 To-Do / Future Enhancements
-	•	Add poll analytics & insights
-	•	Implement poll sharing feature
-	•	Improve UI/UX for mobile responsiveness
-	•	Introduce more notification types
-	•	Enable real-time updates using WebSockets
-
-### VII/ 🤝 Contribution
-Contributions are welcome! Follow these steps to contribute:
-	1.	Fork the repo.
-	2.	Create a new branch: git checkout -b feature-new-feature
-	3.	Commit changes: git commit -m "Added new feature"
-	4.	Push to branch: git push origin feature-new-feature
-	5.	Open a Pull Request
