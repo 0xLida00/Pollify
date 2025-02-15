@@ -113,7 +113,7 @@ TEMPLATES = [
     },
 ]
 
-WSGI_APPLICATION = 'pollify_project.wsgi.application'
+WSGI_APPLICATION = 'pollify_project.pollify_project.wsgi.application'
 
 
 # Custom user model
